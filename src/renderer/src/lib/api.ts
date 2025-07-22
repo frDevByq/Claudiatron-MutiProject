@@ -363,6 +363,8 @@ export interface MCPServer {
   env: Record<string, string>
   /** URL endpoint (for SSE) */
   url?: string
+  /** HTTP headers (for SSE/HTTP) */
+  headers?: Record<string, string>
   /** Configuration scope: "local", "project", or "user" */
   scope: string
   /** Whether the server is currently active */
@@ -598,7 +600,7 @@ export const api = {
   async saveSystemPrompt(content: string): Promise<string> {
     try {
       const api = getWindowApi()
-      return await api.saveSystemPrompt({ content })
+      return await api.saveSystemPrompt(content)
     } catch (error) {
       console.error('Failed to save system prompt:', error)
       throw error
@@ -1073,7 +1075,11 @@ export const api = {
   /**
    * Executes a new interactive Claude Code session with streaming output
    */
-  async executeClaudeCode(projectPath: string, prompt: string, model: string): Promise<{ success: boolean; runId?: number; message: string }> {
+  async executeClaudeCode(
+    projectPath: string,
+    prompt: string,
+    model: string
+  ): Promise<{ success: boolean; runId?: number; message: string }> {
     const api = getWindowApi()
     return api.executeClaudeCode(projectPath, prompt, model)
   },
@@ -1459,11 +1465,12 @@ export const api = {
     args: string[] = [],
     env: Record<string, string> = {},
     url?: string,
-    scope: string = 'local'
+    scope: string = 'local',
+    headers?: Array<{ key: string; value: string }>
   ): Promise<AddServerResult> {
     try {
       const api = getWindowApi()
-      return await api.mcpAdd(name, transport, command, args, env, url, scope)
+      return await api.mcpAdd(name, transport, command, args, env, url, scope, headers)
     } catch (error) {
       console.error('Failed to add MCP server:', error)
       throw error
