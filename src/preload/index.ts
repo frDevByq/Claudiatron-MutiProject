@@ -57,8 +57,9 @@ const api = {
     args: string[] = [],
     env: Record<string, string> = {},
     url?: string,
-    scope: string = 'local'
-  ) => ipcRenderer.invoke('mcp-add', { name, transport, command, args, env, url, scope }),
+    scope: string = 'local',
+    headers?: Array<{ key: string; value: string }>
+  ) => ipcRenderer.invoke('mcp-add', { name, transport, command, args, env, url, scope, headers }),
   mcpList: () => ipcRenderer.invoke('mcp-list'),
   mcpGet: (name: string) => ipcRenderer.invoke('mcp-get', { name }),
   mcpRemove: (name: string) => {
@@ -185,7 +186,7 @@ const api = {
     ipcRenderer.invoke('load-agent-session-history', { sessionId }),
   listRunningClaudeSessions: () => ipcRenderer.invoke('list-running-claude-sessions'),
   listRunningSessions: () => ipcRenderer.invoke('list-running-sessions'),
-  updateSessionId: (runId: number, sessionId: string) => 
+  updateSessionId: (runId: number, sessionId: string) =>
     ipcRenderer.invoke('update-session-id', { runId, sessionId }),
   getClaudeSessionOutput: (sessionId: string) =>
     ipcRenderer.invoke('get-claude-session-output', { sessionId }),
