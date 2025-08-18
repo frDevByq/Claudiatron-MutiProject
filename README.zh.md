@@ -1,3 +1,11 @@
+# ⚠️ 重要声明 ⚠️
+
+**该项目已归档，计划完全重写。**
+
+该仓库不再维护，已被归档。我们计划使用新架构和现代技术完全重写整个项目。请勿将此代码库用于生产环境。
+
+---
+
 <div align="center">
   <img src="./build/icon.png" alt="Claudiatron Logo" width="120" height="120">
 

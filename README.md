@@ -1,3 +1,11 @@
+# ⚠️ IMPORTANT NOTICE ⚠️
+
+**This project has been ARCHIVED and is planned for a complete rewrite.**
+
+This repository is no longer maintained and has been archived. We are planning to rewrite the entire project with a new architecture and modern technologies. Please do not use this codebase for production purposes.
+
+---
+
 <div align="center">
   <img src="./build/icon.png" alt="Claudiatron Logo" width="120" height="120">
 
