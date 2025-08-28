@@ -245,8 +245,6 @@ const FloatingPromptInputInner = (
 
   // Extract image paths from prompt text
   const extractImagePaths = (text: string): string[] => {
-    console.log('[extractImagePaths] Input text length:', text.length)
-
     // Updated regex to handle both quoted and unquoted paths
     // Pattern 1: @"path with spaces or data URLs" - quoted paths
     // Pattern 2: @path - unquoted paths (continues until @ or end)
@@ -257,7 +255,6 @@ const FloatingPromptInputInner = (
 
     // First, extract quoted paths (including data URLs)
     let matches = Array.from(text.matchAll(quotedRegex))
-    console.log('[extractImagePaths] Quoted matches:', matches.length)
 
     for (const match of matches) {
       const path = match[1] // No need to trim, quotes preserve exact path
@@ -285,7 +282,7 @@ const FloatingPromptInputInner = (
 
     // Then extract unquoted paths (typically file paths)
     matches = Array.from(textWithoutQuoted.matchAll(unquotedRegex))
-    console.log('[extractImagePaths] Unquoted matches:', matches.length)
+    // console.log('[extractImagePaths] Unquoted matches:', matches.length)
 
     for (const match of matches) {
       const path = match[1].trim()
@@ -303,15 +300,15 @@ const FloatingPromptInputInner = (
     }
 
     const uniquePaths = Array.from(pathsSet)
-    console.log('[extractImagePaths] Final extracted paths (unique):', uniquePaths.length)
+    // console.log('[extractImagePaths] Final extracted paths (unique):', uniquePaths.length)
     return uniquePaths
   }
 
   // Update embedded images when prompt changes
   useEffect(() => {
-    console.log('[useEffect] Prompt changed:', prompt)
+    // console.log('[useEffect] Prompt changed:', prompt)
     const imagePaths = extractImagePaths(prompt)
-    console.log('[useEffect] Setting embeddedImages to:', imagePaths)
+    // console.log('[useEffect] Setting embeddedImages to:', imagePaths)
     setEmbeddedImages(imagePaths)
   }, [prompt, projectPath])
 

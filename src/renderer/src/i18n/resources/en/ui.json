@@ -56,7 +56,13 @@
     "message": {
       "noProjectsFound": "No projects found in ~/.claude/projects",
       "loading": "Loading projects..."
-    }
+    },
+    "search": {
+      "placeholder": "Search projects..."
+    },
+    "userProjects": "User Projects",
+    "claudeProjects": "Claude Projects",
+    "selectProject": "Select a project to start"
   },
   "titleBar": {
     "appName": "Claudiatron",
@@ -136,7 +142,11 @@
     "count": "session",
     "count_plural": "sessions",
     "firstMessage": "First message",
-    "hasTodo": "Has todo"
+    "hasTodo": "Has todo",
+    "history": "Session History",
+    "selectSession": "Select a session to view",
+    "noSessions": "No sessions found",
+    "selectProjectFirst": "Select a project first"
   },
   "memories": {
     "title": "CLAUDE.md Memories",
@@ -271,5 +281,8 @@
       "updateFailed": "Failed to update agent"
     },
     "confirmLeave": "You have unsaved changes. Are you sure you want to leave?"
+  },
+  "multiProject": {
+    "title": "Multi-Project Manager"
   }
 }

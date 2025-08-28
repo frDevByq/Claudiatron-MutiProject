@@ -2,7 +2,7 @@ import 'reflect-metadata'
 import { DataSource } from 'typeorm'
 import { app } from 'electron'
 import path from 'path'
-import { Agent, AgentRun, AppSettings } from './entities'
+import { Agent, AgentRun, AppSettings, UserProject } from './entities'
 
 class DatabaseManager {
   private dataSource: DataSource | null = null
@@ -19,7 +19,7 @@ class DatabaseManager {
     this.dataSource = new DataSource({
       type: 'better-sqlite3',
       database: dbPath,
-      entities: [Agent, AgentRun, AppSettings],
+      entities: [Agent, AgentRun, AppSettings, UserProject],
       synchronize: true, // Auto-create tables in development
       logging: false, // Set to true for debugging SQL queries
       migrations: [],
@@ -111,3 +111,4 @@ export const databaseManager = new DatabaseManager()
 export const getAgentRepository = () => databaseManager.getRepository(Agent)
 export const getAgentRunRepository = () => databaseManager.getRepository(AgentRun)
 export const getAppSettingsRepository = () => databaseManager.getRepository(AppSettings)
+export const getUserProjectRepository = () => databaseManager.getRepository(UserProject)

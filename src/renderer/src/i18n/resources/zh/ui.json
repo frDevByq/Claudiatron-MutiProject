@@ -1,7 +1,7 @@
 {
   "button": {
     "newClaudeSession": "新建会话",
-    "backToHome": "← 返回首页",
+    "backToHome": "返回首页",
     "save": "保存",
     "cancel": "取消",
     "delete": "删除",
@@ -271,5 +271,8 @@
       "updateFailed": "更新 Agent 失败"
     },
     "confirmLeave": "您有未保存的更改。确定要离开吗？"
+  },
+  "multiProject": {
+    "title": "多项目管理"
   }
 }

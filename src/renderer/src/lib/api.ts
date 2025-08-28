@@ -27,17 +27,21 @@ export interface ProcessInfo {
 }
 
 /**
- * Represents a project in the ~/.claude/projects directory
+ * Represents a project in the ~/.claude/projects directory or user-added project
  */
 export interface Project {
   /** The project ID (derived from the directory name) */
   id: string
+  /** The project name (for user projects) */
+  name?: string
   /** The original project path (decoded from the directory name) */
   path: string
   /** List of session IDs (JSONL file names without extension) */
   sessions: string[]
   /** Unix timestamp when the project directory was created */
   created_at: number
+  /** Whether this is a user-added project */
+  isUserProject?: boolean
 }
 
 /**
@@ -58,6 +62,10 @@ export interface Session {
   first_message?: string
   /** Timestamp of the first user message (if available) */
   message_timestamp?: string
+  /** Whether this is a temporary session (not yet persisted) */
+  isTemporary?: boolean
+  /** Whether this is a newly created session (to avoid loading history immediately) */
+  isNewlyCreated?: boolean
 }
 
 /**
@@ -1966,6 +1974,147 @@ export const api = {
       return await api.slashCommandDelete(commandId, projectPath)
     } catch (error) {
       console.error('Failed to delete slash command:', error)
+      throw error
+    }
+  },
+
+  // Settings API methods
+
+  /**
+   * Get an app setting by key
+   */
+  async getAppSetting(key: string): Promise<string | null> {
+    try {
+      const api = getWindowApi()
+      return await api.getAppSetting(key)
+    } catch (error) {
+      console.error('Failed to get app setting:', error)
+      return null
+    }
+  },
+
+  /**
+   * Set an app setting
+   */
+  async setAppSetting(key: string, value: string): Promise<void> {
+    try {
+      const api = getWindowApi()
+      await api.setAppSetting(key, value)
+    } catch (error) {
+      console.error('Failed to set app setting:', error)
+      throw error
+    }
+  },
+
+  /**
+   * Get multiple app settings by keys
+   */
+  async getSettings(keys: string[]): Promise<Record<string, string>> {
+    try {
+      const api = getWindowApi()
+      return await api.getAppSettings(keys)
+    } catch (error) {
+      console.error('Failed to get app settings:', error)
+      return {}
+    }
+  },
+
+  /**
+   * Set multiple app settings
+   */
+  async setSettings(settings: Record<string, string>): Promise<void> {
+    try {
+      const api = getWindowApi()
+      await api.setAppSettings(settings)
+    } catch (error) {
+      console.error('Failed to set app settings:', error)
+      throw error
+    }
+  },
+
+  /**
+   * Set a single setting (alias for setAppSetting)
+   */
+  async setSetting(key: string, value: string): Promise<void> {
+    return this.setAppSetting(key, value)
+  },
+
+  // User Projects API methods
+
+  /**
+   * Get all user projects
+   */
+  async getUserProjects(): Promise<any[]> {
+    try {
+      const api = getWindowApi()
+      return await api.getUserProjects()
+    } catch (error) {
+      console.error('Failed to get user projects:', error)
+      throw error
+    }
+  },
+
+  /**
+   * Add user project by showing directory dialog
+   */
+  async addUserProjectByDialog(): Promise<{ canceled: boolean; project?: any }> {
+    try {
+      const api = getWindowApi()
+      return await api.addUserProjectByDialog()
+    } catch (error) {
+      console.error('Failed to add user project by dialog:', error)
+      throw error
+    }
+  },
+
+  /**
+   * Add user project by path
+   */
+  async addUserProject(projectPath: string, projectName?: string): Promise<any> {
+    try {
+      const api = getWindowApi()
+      return await api.addUserProject(projectPath, projectName)
+    } catch (error) {
+      console.error('Failed to add user project:', error)
+      throw error
+    }
+  },
+
+  /**
+   * Update user project
+   */
+  async updateUserProject(data: any): Promise<any> {
+    try {
+      const api = getWindowApi()
+      return await api.updateUserProject(data)
+    } catch (error) {
+      console.error('Failed to update user project:', error)
+      throw error
+    }
+  },
+
+  /**
+   * Remove user project
+   */
+  async removeUserProject(projectId: number): Promise<{ success: boolean }> {
+    try {
+      const api = getWindowApi()
+      return await api.removeUserProject(projectId)
+    } catch (error) {
+      console.error('Failed to remove user project:', error)
+      throw error
+    }
+  },
+
+  /**
+   * Create new session for user project
+   */
+  async createUserProjectSession(projectPath: string): Promise<any> {
+    try {
+      const api = getWindowApi()
+      return await api.createUserProjectSession(projectPath)
+    } catch (error) {
+      console.error('Failed to create user project session:', error)
       throw error
     }
   }

@@ -12,7 +12,8 @@ import {
   ChevronUp,
   X,
   Hash,
-  Command
+  Command,
+  RefreshCw
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -52,6 +53,10 @@ interface ClaudeCodeSessionProps {
    */
   initialProjectPath?: string
   /**
+   * Project path (alternative to initialProjectPath)
+   */
+  projectPath?: string
+  /**
    * Callback to go back
    */
   onBack: () => void
@@ -67,6 +72,10 @@ interface ClaudeCodeSessionProps {
    * Callback when streaming state changes
    */
   onStreamingChange?: (isStreaming: boolean, sessionId: string | null) => void
+  /**
+   * Callback when a new session is created (returns the real session ID)
+   */
+  onSessionCreated?: (sessionId: string) => void
 }
 
 /**
@@ -78,13 +87,17 @@ interface ClaudeCodeSessionProps {
 export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
   session,
   initialProjectPath = '',
+  projectPath: propProjectPath,
   onBack,
   onProjectSettings,
   className,
-  onStreamingChange
+  onStreamingChange,
+  onSessionCreated
 }) => {
   const { t } = useTranslation('session')
-  const [projectPath, setProjectPath] = useState(initialProjectPath || session?.project_path || '')
+  const [projectPath, setProjectPath] = useState(
+    propProjectPath || initialProjectPath || session?.project_path || ''
+  )
   const [messages, setMessages] = useState<ClaudeStreamMessage[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -105,6 +118,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
   const [showSlashCommandsSettings, setShowSlashCommandsSettings] = useState(false)
   const [forkCheckpointId, setForkCheckpointId] = useState<string | null>(null)
   const [forkSessionName, setForkSessionName] = useState('')
+  const [showReloadHistoryButton, setShowReloadHistoryButton] = useState(false)
 
   // Queued prompts state
   const [queuedPrompts, setQueuedPrompts] = useState<
@@ -153,6 +167,21 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
   // Filter out messages that shouldn't be displayed
   const displayableMessages = useMemo(() => {
     return messages.filter((message, index) => {
+      // Skip system initialization messages
+      if (message.type === 'system' && message.subtype === 'init') {
+        return false
+      }
+
+      // Skip execution complete messages (both system and result types)
+      if (message.type === 'system' && message.subtype === 'complete') {
+        return false
+      }
+
+      // Skip result messages that show "Execution Complete" or "Execution Failed"
+      if (message.type === 'result') {
+        return false
+      }
+
       // Skip meta messages that don't have meaningful content
       if (message.isMeta && !message.leafUuid && !message.summary) {
         return false
@@ -268,14 +297,34 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
 
   // Load session history if resuming
   useEffect(() => {
-    if (session) {
+    if (session && !session.isTemporary) {
       // Set the claudeSessionId immediately when we have a session
       setClaudeSessionId(session.id)
 
       // Load session history first, then check for active session
       const initializeSession = async () => {
-        await loadSessionHistory()
-        // After loading history, check if the session is still active
+        // For newly created sessions, wait a bit for the file to be written
+        if (session.isNewlyCreated) {
+          console.log('[ClaudeCodeSession] Delaying history load for newly created session:', session.id)
+          await new Promise(resolve => setTimeout(resolve, 1000)) // Wait 1 second
+
+          try {
+            await loadSessionHistory()
+            console.log('[ClaudeCodeSession] Successfully loaded history for new session after delay')
+            setShowReloadHistoryButton(false) // Hide reload button if successful
+          } catch (error) {
+            console.log('[ClaudeCodeSession] History still not available for new session, showing reload button')
+            // Clear any error state since this is expected for new sessions
+            setError(null)
+            // Show reload button for manual retry
+            setShowReloadHistoryButton(true)
+          }
+        } else {
+          // For existing sessions, history load failure is an actual error
+          await loadSessionHistory()
+        }
+
+        // After loading history (or failing gracefully), check if the session is still active
         if (isMountedRef.current) {
           await checkForActiveSession()
         }
@@ -339,6 +388,13 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
       setIsLoading(true)
       setError(null)
 
+      console.log('[ClaudeCodeSession] loadSessionHistory - Attempting to load session:', {
+        sessionId: session.id,
+        projectId: session.project_id,
+        projectPath: session.project_path,
+        isTemporary: session.isTemporary
+      })
+
       const history = await api.loadSessionHistory(session.id, session.project_id)
 
       // Convert history to messages format
@@ -352,6 +408,7 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
 
       // After loading history, we're continuing a conversation
       setIsFirstPrompt(false)
+      console.log('[ClaudeCodeSession] loadSessionHistory - Successfully loaded', loadedMessages.length, 'messages')
     } catch (err) {
       console.error('Failed to load session history:', err)
       setError('Failed to load session history')
@@ -549,6 +606,9 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
                 )
                 currentSessionId = msg.session_id
                 setClaudeSessionId(msg.session_id)
+
+                // Notify parent component about the new session
+                onSessionCreated?.(msg.session_id)
 
                 // Update the backend with the session ID
                 if (currentRunId) {
@@ -835,6 +895,20 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
     }
   }
 
+  const handleReloadHistory = async () => {
+    if (!session) return
+
+    try {
+      console.log('[ClaudeCodeSession] Manual reload of session history requested')
+      await loadSessionHistory()
+      setShowReloadHistoryButton(false) // Hide button on success
+      console.log('[ClaudeCodeSession] Manual history reload successful')
+    } catch (error) {
+      console.error('[ClaudeCodeSession] Manual history reload failed:', error)
+      // Keep the button visible for retry
+    }
+  }
+
   const handleFork = (checkpointId: string) => {
     setForkCheckpointId(checkpointId)
     setForkSessionName(`Fork-${new Date().toISOString().slice(0, 10)}`)
@@ -1089,6 +1163,26 @@ export const ClaudeCodeSession: React.FC<ClaudeCodeSessionProps> = ({
               </Button>
             )}
             <div className="flex items-center gap-2">
+              {showReloadHistoryButton && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleReloadHistory}
+                        className="h-8"
+                      >
+                        <RefreshCw className="h-4 w-4 mr-1" />
+                        Reload History
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Reload session history</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>

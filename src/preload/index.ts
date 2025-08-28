@@ -82,6 +82,8 @@ const api = {
   // Storage Management
   getAppSetting: (key: string) => ipcRenderer.invoke('get-app-setting', key),
   setAppSetting: (key: string, value: string) => ipcRenderer.invoke('set-app-setting', key, value),
+  getAppSettings: (keys: string[]) => ipcRenderer.invoke('get-app-settings', keys),
+  setAppSettings: (settings: Record<string, string>) => ipcRenderer.invoke('set-app-settings', settings),
   getAllAppSettings: () => ipcRenderer.invoke('get-all-app-settings'),
   deleteAppSetting: (key: string) => ipcRenderer.invoke('delete-app-setting', key),
   clearAllAppSettings: () => ipcRenderer.invoke('clear-all-app-settings'),
@@ -154,6 +156,16 @@ const api = {
     ),
   slashCommandDelete: (commandId: string, projectPath?: string) =>
     ipcRenderer.invoke('slash-commands-delete', commandId, projectPath),
+
+  // User Projects
+  getUserProjects: () => ipcRenderer.invoke('get-user-projects'),
+  addUserProjectByDialog: () => ipcRenderer.invoke('add-user-project-by-dialog'),
+  addUserProject: (projectPath: string, projectName?: string) =>
+    ipcRenderer.invoke('add-user-project', projectPath, projectName),
+  updateUserProject: (data: any) => ipcRenderer.invoke('update-user-project', data),
+  removeUserProject: (projectId: number) => ipcRenderer.invoke('remove-user-project', projectId),
+  createUserProjectSession: (projectPath: string) =>
+    ipcRenderer.invoke('create-user-project-session', projectPath),
 
   // Storage APIs
   storageListTables: () => ipcRenderer.invoke('storage-list-tables'),

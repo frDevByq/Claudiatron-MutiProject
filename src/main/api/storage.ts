@@ -29,6 +29,29 @@ export function setupStorageHandlers() {
     }
   })
 
+  // Get multiple app settings by keys
+  ipcMain.handle('get-app-settings', async (_, keys: string[]) => {
+    console.log('Main: get-app-settings called with', keys)
+    try {
+      return await appSettingsService.getSettings(keys)
+    } catch (error) {
+      console.error('Error getting app settings:', error)
+      return {}
+    }
+  })
+
+  // Set multiple app settings
+  ipcMain.handle('set-app-settings', async (_, settings: Record<string, string>) => {
+    console.log('Main: set-app-settings called with', Object.keys(settings).length, 'items')
+    try {
+      await appSettingsService.setSettings(settings)
+      return 'Settings saved successfully'
+    } catch (error) {
+      console.error('Error setting app settings:', error)
+      throw new Error('Failed to save settings')
+    }
+  })
+
   // Get all app settings
   ipcMain.handle('get-all-app-settings', async () => {
     console.log('Main: get-all-app-settings called')

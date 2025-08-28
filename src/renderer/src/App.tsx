@@ -23,10 +23,12 @@ import { NFOCredits } from '@/components/NFOCredits'
 import { ClaudeBinaryDialog } from '@/components/ClaudeBinaryDialog'
 import { Toast, ToastContainer } from '@/components/ui/toast'
 import { ProjectSettings } from '@/components/ProjectSettings'
+import { MultiProjectLayout } from '@/components/MultiProjectLayout'
 
 type View =
   | 'welcome'
   | 'projects'
+  | 'multi-project'
   | 'editor'
   | 'claude-file-editor'
   | 'claude-code-session'
@@ -250,7 +252,7 @@ function App() {
                 >
                   <Card
                     className="h-64 cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-lg border border-border/50 shimmer-hover trailing-border"
-                    onClick={() => handleViewChange('projects')}
+                    onClick={() => handleViewChange('multi-project')}
                   >
                     <div className="h-full flex flex-col items-center justify-center p-8">
                       <FolderCode className="h-16 w-16 mb-4 text-primary" />
@@ -278,6 +280,13 @@ function App() {
           <div className="flex-1 flex flex-col overflow-hidden" style={{ minHeight: 0 }}>
             <Settings onBack={() => handleViewChange('welcome')} />
           </div>
+        )
+
+      case 'multi-project':
+        return (
+          <MultiProjectLayout
+            onBack={() => handleViewChange('welcome')}
+          />
         )
 
       case 'projects':

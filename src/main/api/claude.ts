@@ -36,6 +36,16 @@ async function getProjectPathFromSessions(projectDir: string): Promise<string | 
 }
 
 /**
+ * Encodes a project path to a directory name compatible with Claude Code
+ * This matches Claude Code's encoding logic
+ */
+export function encodeProjectPath(projectPath: string): string {
+  // Replace all non-alphanumeric characters with hyphens
+  // This matches Claude Code's behavior
+  return projectPath.replace(/[^a-zA-Z0-9]/g, '-')
+}
+
+/**
  * Decodes a project directory name back to its original path
  * This is a fallback when we can't get the path from JSONL files
  */
@@ -691,16 +701,46 @@ export function setupClaudeHandlers() {
 
   // Session History
   ipcMain.handle('load-session-history', async (_, { sessionId, projectId }) => {
-    console.log('Main: load-session-history called with', sessionId, projectId)
+    console.log('Main: load-session-history called with', { sessionId, projectId })
     try {
       const claudeProjectsDir = join(homedir(), '.claude/projects')
       const sessionPath = join(claudeProjectsDir, projectId, `${sessionId}.jsonl`)
 
+      console.log('Main: load-session-history - Looking for session file at:', sessionPath)
+      console.log('Main: load-session-history - Claude projects directory:', claudeProjectsDir)
+      console.log('Main: load-session-history - Project directory:', join(claudeProjectsDir, projectId))
+
       // Check if file exists
       if (!(await exists(sessionPath))) {
+        console.log('Main: load-session-history - Session file does not exist at expected path')
+
+        // Let's also check what files actually exist in the project directory
+        try {
+          const projectDir = join(claudeProjectsDir, projectId)
+          const projectDirExists = await exists(projectDir)
+          console.log('Main: load-session-history - Project directory exists:', projectDirExists)
+
+          if (projectDirExists) {
+            const files = await fs.readdir(projectDir)
+            console.log('Main: load-session-history - Files in project directory:', files)
+          }
+
+          // Also check what project directories exist
+          const claudeDirExists = await exists(claudeProjectsDir)
+          console.log('Main: load-session-history - Claude projects directory exists:', claudeDirExists)
+
+          if (claudeDirExists) {
+            const projectDirs = await fs.readdir(claudeProjectsDir)
+            console.log('Main: load-session-history - Available project directories:', projectDirs)
+          }
+        } catch (debugError) {
+          console.log('Main: load-session-history - Error during debug logging:', debugError)
+        }
+
         throw new Error(`Session file not found: ${sessionId}`)
       }
 
+      console.log('Main: load-session-history - Session file found, reading content')
       const content = await fs.readFile(sessionPath, 'utf-8')
       const lines = content.split('\n').filter((line) => line.trim())
       const messages: any[] = []
@@ -714,6 +754,7 @@ export function setupClaudeHandlers() {
         }
       }
 
+      console.log('Main: load-session-history - Successfully loaded', messages.length, 'messages')
       return messages
     } catch (error) {
       console.error('Error loading session history:', error)

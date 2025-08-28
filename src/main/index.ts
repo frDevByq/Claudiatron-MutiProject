@@ -10,6 +10,7 @@ import { setupStorageHandlers } from './api/storage'
 import { setupUsageHandlers } from './api/usage'
 import { setupHooksHandlers } from './api/hooks'
 import { setupSlashCommandsHandlers } from './api/slashCommands'
+import { setupUserProjectsHandlers } from './api/userProjects'
 import { databaseManager } from './database/connection'
 import { processManager } from './process/ProcessManager'
 import { loadShellEnvironment } from './utils/shellEnv'
@@ -90,6 +91,7 @@ app.whenReady().then(async () => {
   setupUsageHandlers()
   setupHooksHandlers()
   setupSlashCommandsHandlers()
+  setupUserProjectsHandlers()
 
   // Register frameless window IPC for window controls
   optimizer.registerFramelessWindowIpc()
