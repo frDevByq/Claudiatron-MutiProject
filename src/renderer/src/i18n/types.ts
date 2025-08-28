@@ -100,6 +100,24 @@ export interface UITranslations {
       claudeBinaryPathSaved: string
     }
   }
+  topbar: {
+    status: {
+      checking: string
+      claudeCode: string
+      notFound: string
+      selectInstallation: string
+      installClaudeCode: string
+    }
+    buttons: {
+      usageDashboard: string
+      claudeMd: string
+      mcp: string
+      settings: string
+      about: string
+      console: string
+      refresh: string
+    }
+  }
 }
 
 export interface SettingsTranslations {

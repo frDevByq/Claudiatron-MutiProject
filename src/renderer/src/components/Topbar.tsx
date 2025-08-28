@@ -1,11 +1,21 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
-import { Circle, FileText, Settings, ExternalLink, BarChart3, Network, Info } from 'lucide-react'
+import {
+  Circle,
+  FileText,
+  Settings,
+  ExternalLink,
+  BarChart3,
+  Network,
+  Info,
+  Terminal,
+  RotateCcw
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover'
 import { ThemeToggle } from './ThemeToggle'
-import { api, type ClaudeVersionStatus } from '@/lib/api'
+import { api, type ClaudeVersionStatus, toggleDevTools, refreshPage } from '@/lib/api'
 import { cn } from '@/lib/utils'
 import { ClaudeIcon } from './ClaudeIcon'
 
@@ -58,11 +68,31 @@ export const Topbar: React.FC<TopbarProps> = ({
   const { t } = useTranslation('ui')
   const [versionStatus, setVersionStatus] = useState<ClaudeVersionStatus | null>(null)
   const [checking, setChecking] = useState(true)
+  const [isConsoleOpen, setIsConsoleOpen] = useState(false)
 
   // Check Claude version on mount
   useEffect(() => {
     checkVersion()
   }, [])
+
+  // Handle console toggle
+  const handleConsoleToggle = async () => {
+    try {
+      const result = await toggleDevTools()
+      setIsConsoleOpen(result.isOpen)
+    } catch (error) {
+      console.error('Failed to toggle console:', error)
+    }
+  }
+
+  // Handle page refresh
+  const handleRefresh = async () => {
+    try {
+      await refreshPage()
+    } catch (error) {
+      console.error('Failed to refresh page:', error)
+    }
+  }
 
   const checkVersion = async () => {
     try {
@@ -189,6 +219,28 @@ export const Topbar: React.FC<TopbarProps> = ({
         <Button variant="ghost" size="sm" onClick={onSettingsClick} className="text-xs">
           <Settings className="mr-2 h-3 w-3" />
           {t('topbar.buttons.settings')}
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleConsoleToggle}
+          className={`text-xs ${isConsoleOpen ? 'bg-accent' : ''}`}
+          title={t('topbar.buttons.console')}
+        >
+          <Terminal className="mr-2 h-3 w-3" />
+          {t('topbar.buttons.console')}
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleRefresh}
+          className="text-xs"
+          title={t('topbar.buttons.refresh')}
+        >
+          <RotateCcw className="mr-2 h-3 w-3" />
+          {t('topbar.buttons.refresh')}
         </Button>
 
         <ThemeToggle />

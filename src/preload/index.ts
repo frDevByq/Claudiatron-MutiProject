@@ -258,7 +258,11 @@ const api = {
 
   // Window Controls (using electron-toolkit/utils pattern)
   windowControl: (action: 'min' | 'max' | 'close' | 'show' | 'showInactive') =>
-    ipcRenderer.send('win:invoke', action)
+    ipcRenderer.send('win:invoke', action),
+
+  // Console and page controls
+  toggleDevTools: () => ipcRenderer.invoke('toggle-dev-tools'),
+  refreshPage: () => ipcRenderer.invoke('refresh-page')
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

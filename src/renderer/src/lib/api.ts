@@ -2078,3 +2078,14 @@ export const getCurrentWebviewWindow = () => {
     hide: () => {}
   }
 }
+
+// Console and page controls
+export const toggleDevTools = async (): Promise<{ isOpen: boolean }> => {
+  const windowApi = getWindowApi()
+  return windowApi.toggleDevTools()
+}
+
+export const refreshPage = async (): Promise<{ success: boolean }> => {
+  const windowApi = getWindowApi()
+  return windowApi.refreshPage()
+}

@@ -82,7 +82,9 @@
       "claudeMd": "CLAUDE.md",
       "mcp": "MCP",
       "settings": "Settings",
-      "about": "About"
+      "about": "About",
+      "console": "Console",
+      "refresh": "Refresh"
     }
   },
   "chat": {

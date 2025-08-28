@@ -82,7 +82,9 @@
       "claudeMd": "CLAUDE.md",
       "mcp": "MCP",
       "settings": "设置",
-      "about": "关于"
+      "about": "关于",
+      "console": "控制台",
+      "refresh": "刷新"
     }
   },
   "chat": {

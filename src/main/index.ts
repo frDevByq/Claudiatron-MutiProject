@@ -94,6 +94,31 @@ app.whenReady().then(async () => {
   // Register frameless window IPC for window controls
   optimizer.registerFramelessWindowIpc()
 
+  // Console toggle handler
+  ipcMain.handle('toggle-dev-tools', async () => {
+    const focusedWindow = BrowserWindow.getFocusedWindow()
+    if (focusedWindow) {
+      if (focusedWindow.webContents.isDevToolsOpened()) {
+        focusedWindow.webContents.closeDevTools()
+        return { isOpen: false }
+      } else {
+        focusedWindow.webContents.openDevTools()
+        return { isOpen: true }
+      }
+    }
+    return { isOpen: false }
+  })
+
+  // Refresh page handler
+  ipcMain.handle('refresh-page', async () => {
+    const focusedWindow = BrowserWindow.getFocusedWindow()
+    if (focusedWindow) {
+      focusedWindow.webContents.reload()
+      return { success: true }
+    }
+    return { success: false }
+  })
+
   const mainWindow = createWindow()
 
   // Set the browser window for process manager
